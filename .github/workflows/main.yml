@@ -111,7 +111,7 @@ jobs:
 
     - name: Actualizar credenciales de EKS
       run: |
-        aws eks update-kubeconfig --region us-east-1 --name EKS-prueba
+        aws eks update-kubeconfig --region us-east-1 --name EKS-Innovatech
 
     - name: Aplicar manifiestos de Kubernetes
       run: |
