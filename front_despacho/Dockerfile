@@ -1,28 +1,31 @@
-# Creo la maquina virtual de construccion
+# --- Stage 1: Construcción (Build) ---
 FROM node:18-alpine AS build
-
 WORKDIR /app
-
 COPY package*.json ./
-
 RUN npm ci
-
 COPY . .
-# Compila el proyecto generando el directorio /dist
 RUN npm run build
 
+# --- Stage 2: Imagen final para producción (Nginx) ---
+FROM nginx:alpine AS production
 
-# Stage 2: Despliegue seguro en producción
-# Usamos la variante oficial de Nginx diseñada nativamente para correr como No-Root
-FROM nginxinc/nginx-unprivileged:alpine AS production
-
-# Copia los artefactos estáticos compilados desde la etapa build
+# Copiamos los archivos estáticos de React
 COPY --from=build /app/dist /usr/share/nginx/html
 
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+# EXTREMADAMENTE IMPORTANTE: Cambiar el puerto base de Nginx al 8080 vía comandos
+RUN sed -i 's/listen\.+80;/listen 8080;/g' /etc/nginx/conf.d/default.conf
 
-# Exponer el puerto alto nativo de esta imagen (mayor a 1024)
+# Exponemos el puerto alto seguro
 EXPOSE 8080
 
-# Nota técnica para la defensa: Esta imagen ya se inicializa de forma interna 
-# bajo un usuario limitado sin privilegios de administrador ('nginx').
+# Ajustamos permisos para que el usuario limitado pueda usar las carpetas de Nginx
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    touch /var/run/nginx.pid && \
+    chown nginx:nginx /var/run/nginx.pid
+
+# Cambiamos explícitamente al usuario sin privilegios antes de ejecutar
+USER nginx
+
+CMD ["nginx", "-g", "daemon off;"]
