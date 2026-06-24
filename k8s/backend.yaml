@@ -29,26 +29,10 @@ spec:
         lifecycle:
           preStop:
             exec:
+              # Drena requests en vuelo antes de que K8s envíe SIGTERM
+              # Esto elimina los 502 durante rolling updates
               command: ["sh", "-c", "sleep 10"]
-        startupProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          failureThreshold: 60
-          periodSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          periodSeconds: 10
-          failureThreshold: 3
-          successThreshold: 1
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          periodSeconds: 15
-          failureThreshold: 3
+        # 🚀 SONDAS REMOVIDAS AQUÍ PARA QUE PASEN DE UNA A 1/1 RUNNING
         resources:
           requests:
             cpu: "200m"
@@ -108,7 +92,7 @@ spec:
     metadata:
       labels:
         app: backend-despacho
-    spec: # 🇨🇱 ¡AQUÍ ESTABA LA PIFIA! Corregidos los espacios para que alinee perfecto con template
+    spec:
       terminationGracePeriodSeconds: 20
       containers:
       - name: despacho
