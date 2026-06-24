@@ -97,41 +97,47 @@ spec:
     metadata:
       labels:
         app: backend-despacho
-    spec:
-      terminationGracePeriodSeconds: 20
-      containers:
-      - name: despacho
-        image: 911888005875.dkr.ecr.us-east-1.amazonaws.com/back-despacho:latest
-        ports:
-        - containerPort: 8080
-        lifecycle:
-          preStop:
-            exec:
-              command: ["sh", "-c", "sleep 10"]
-        resources:
-          requests:
-            cpu: "200m"
-            memory: "256Mi"
-          limits:
-            cpu: "600m"
-            memory: "768Mi"
-        env:
-        - name: DB_ENDPOINT
-          value: "innovatech-db-svc"
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_NAME
-          value: "innovatech_db"
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: innovatech-db-secret
-              key: MYSQL_USER
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: innovatech-db-secret
-              key: MYSQL_PASSWORD
+  spec:
+    terminationGracePeriodSeconds: 20
+    containers:
+    - name: despacho
+      image: 911888005875.dkr.ecr.us-east-1.amazonaws.com/back-despacho:latest
+      ports:
+      - containerPort: 8081 # 1️⃣ CAMBIAR AL PUERTO REAL DE TOMCAT (8081)
+      lifecycle:
+        preStop:
+          exec:
+            command: ["sh", "-c", "sleep 10"]
+      resources:
+        requests:
+          cpu: "200m"
+          memory: "256Mi"
+        limits:
+          cpu: "600m"
+          memory: "768Mi"
+      env:
+      # 2️⃣ INYECTAR ESTAS DOS VARIABLES PARA MATAR AL AGENTE COCHINO DE AWS
+      - name: AWS_OTEL_DISTRO_ENABLED
+        value: "false"
+      - name: OTEL_JAVAAGENT_ENABLED
+        value: "false"
+      # ==============================================================
+      - name: DB_ENDPOINT
+        value: "innovatech-db-svc"
+      - name: DB_PORT
+        value: "3306"
+      - name: DB_NAME
+        value: "innovatech_db"
+      - name: DB_USERNAME
+        value:From:
+          secretKeyRef:
+            name: innovatech-db-secret
+            key: MYSQL_USER
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: innovatech-db-secret
+            key: MYSQL_PASSWORD
 ---
 apiVersion: v1
 kind: Service
@@ -143,5 +149,5 @@ spec:
   selector:
     app: backend-despacho
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 8080       # El puerto por el que Nginx lo busca se queda en 8080 (Impecable)
+    targetPort: 8081 # 3️⃣ CAMBIAR EL TARGET PORT AL 8081 PARA QUE REDIRIGE BIEN A TOMCAT
