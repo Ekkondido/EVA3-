@@ -19,7 +19,7 @@ spec:
     metadata:
       labels:
         app: backend-venta
-    spec:
+    spec: # 🇨🇱 CORREGIDO: Ahora alinea perfecto con template (6 espacios)
       terminationGracePeriodSeconds: 20
       containers:
       - name: venta
@@ -38,12 +38,10 @@ spec:
             cpu: "200m"
             memory: "384Mi"
         env:
-        # 🇨🇱 APAGAMOS EL AGENTE DE AWS TAMBIÉN EN VENTAS PARA QUE DEJE DE CONGELARSE
         - name: AWS_OTEL_DISTRO_ENABLED
           value: "false"
         - name: OTEL_JAVAAGENT_ENABLED
           value: "false"
-        # ===================================================================
         - name: DB_ENDPOINT
           value: "innovatech-db-svc"
         - name: DB_PORT
@@ -145,5 +143,5 @@ spec:
   selector:
     app: backend-despacho
   ports:
-  - port: 8080
+  - port: 8081       # 🇨🇱 CORREGIDO: Cambiado a 8081 para que Nginx conecte directo sin colisionar
     targetPort: 8081
