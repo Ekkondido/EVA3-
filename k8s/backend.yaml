@@ -7,6 +7,11 @@ metadata:
   name: backend-venta
   namespace: innovatech
 spec:
+  replicas: 1  # 🇨🇱 ¡FIJAMOS 1 SÓLA RÉPLICA AQUÍ!
+  selector:
+    matchLabels:
+      app: backend-venta
+spec:
   selector:
     matchLabels:
       app: backend-venta
@@ -80,6 +85,11 @@ kind: Deployment
 metadata:
   name: backend-despacho
   namespace: innovatech
+spec:
+  replicas: 1  # 🇨🇱 ¡FIJAMOS 1 SÓLA RÉPLICA AQUÍ TAMBIÉN!
+  selector:
+    matchLabels:
+      app: backend-despacho
 spec:
   selector:
     matchLabels:
