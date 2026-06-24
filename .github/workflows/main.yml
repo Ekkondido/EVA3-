@@ -2,8 +2,7 @@ name: CI/CD INNOVATECH - Producción EKS
 
 on:
   push:
-    branches: [ "main" ]
-
+    branches: [ "deploy" ]
 
 jobs:
   # ==========================================
@@ -22,15 +21,13 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: us-east-1
 
     - name: Login en Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build & Push - Frontend
-      env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         cd front_despacho
         docker build -t ${{ steps.login-ecr.outputs.registry }}/front-despacho:latest .
@@ -52,19 +49,17 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: us-east-1
 
     - name: Login en Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build & Push - Ventas
-      env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         cd back-Ventas_SpringBoot/Springboot-API-REST
-        docker build -t $REGISTRY/back-ventas:${{ env.IMAGE_TAG }} -t $REGISTRY/back-ventas:latest .
-        docker push -a $REGISTRY/back-ventas
+        docker build -t ${{ steps.login-ecr.outputs.registry }}/back-ventas:latest .
+        docker push ${{ steps.login-ecr.outputs.registry }}/back-ventas:latest
 
   # ==========================================
   # ETAPA 3: BUILD & PUSH BACKEND DESPACHOS
@@ -82,19 +77,17 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: us-east-1
 
     - name: Login en Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build & Push - Despachos
-      env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         cd back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
-        docker build -t $REGISTRY/back-despacho:${{ env.IMAGE_TAG }} -t $REGISTRY/back-despacho:latest .
-        docker push -a $REGISTRY/back-despacho
+        docker build -t ${{ steps.login-ecr.outputs.registry }}/back-despacho:latest .
+        docker push ${{ secrets.login-ecr.outputs.registry }}/back-despacho:latest
 
   # ==========================================
   # ETAPA 4: DEPLOY EN EKS
@@ -105,7 +98,6 @@ jobs:
     needs: [build-frontend, build-backend-ventas, build-backend-despachos]
 
     steps:
-    # NUEVO: sin esto no puedes acceder a los YAMLs del repo
     - name: Checkout del código
       uses: actions/checkout@v4
 
@@ -115,11 +107,11 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: us-east-1
 
     - name: Actualizar credenciales de EKS
       run: |
-        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name EKS-prueba
+        aws eks update-kubeconfig --region us-east-1 --name EKS-prueba
 
     - name: Aplicar manifiestos de Kubernetes
       run: |
@@ -137,7 +129,6 @@ jobs:
 
     - name: Verificar deploy exitoso
       run: |
-        # & para correr en paralelo, wait para esperar a que terminen todos
         kubectl rollout status deployment/backend-venta -n innovatech --timeout=300s &
         kubectl rollout status deployment/backend-despacho -n innovatech --timeout=300s &
         kubectl rollout status deployment/frontend-app -n innovatech --timeout=90s &
