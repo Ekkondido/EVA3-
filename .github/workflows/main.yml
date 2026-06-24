@@ -35,8 +35,8 @@ jobs:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         cd front_despacho
-        docker build -t $REGISTRY/front-despacho:${{ env.IMAGE_TAG }} -t $REGISTRY/front-despacho:latest .
-        docker push -a $REGISTRY/front-despacho
+        docker build -t ${{ steps.login-ecr.outputs.registry }}/front-despacho:latest .
+        docker push ${{ steps.login-ecr.outputs.registry }}/front-despacho:latest
 
   # ==========================================
   # ETAPA 2: BUILD & PUSH BACKEND VENTAS
