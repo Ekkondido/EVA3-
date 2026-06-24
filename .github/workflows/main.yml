@@ -95,8 +95,8 @@ jobs:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         cd back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
-        docker build -t $REGISTRY/back-despachos:${{ env.IMAGE_TAG }} -t $REGISTRY/back-despachos:latest .
-        docker push -a $REGISTRY/back-despachos
+        docker build -t $REGISTRY/back-despacho:${{ env.IMAGE_TAG }} -t $REGISTRY/back-despacho:latest .
+        docker push -a $REGISTRY/back-despacho
 
   # ==========================================
   # ETAPA 4: DEPLOY EN EKS
