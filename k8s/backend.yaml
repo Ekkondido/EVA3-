@@ -103,7 +103,7 @@ spec:
     - name: despacho
       image: 911888005875.dkr.ecr.us-east-1.amazonaws.com/back-despacho:latest
       ports:
-      - containerPort: 8081 # 1️⃣ CAMBIAR AL PUERTO REAL DE TOMCAT (8081)
+      - containerPort: 8081
       lifecycle:
         preStop:
           exec:
@@ -116,12 +116,10 @@ spec:
           cpu: "600m"
           memory: "768Mi"
       env:
-      # 2️⃣ INYECTAR ESTAS DOS VARIABLES PARA MATAR AL AGENTE COCHINO DE AWS
       - name: AWS_OTEL_DISTRO_ENABLED
         value: "false"
       - name: OTEL_JAVAAGENT_ENABLED
         value: "false"
-      # ==============================================================
       - name: DB_ENDPOINT
         value: "innovatech-db-svc"
       - name: DB_PORT
@@ -129,7 +127,7 @@ spec:
       - name: DB_NAME
         value: "innovatech_db"
       - name: DB_USERNAME
-        value:From:
+        valueFrom:
           secretKeyRef:
             name: innovatech-db-secret
             key: MYSQL_USER
@@ -149,5 +147,5 @@ spec:
   selector:
     app: backend-despacho
   ports:
-  - port: 8080       # El puerto por el que Nginx lo busca se queda en 8080 (Impecable)
-    targetPort: 8081 # 3️⃣ CAMBIAR EL TARGET PORT AL 8081 PARA QUE REDIRIGE BIEN A TOMCAT
+  - port: 8080
+    targetPort: 8081
