@@ -29,18 +29,21 @@ spec:
         lifecycle:
           preStop:
             exec:
-              # Drena requests en vuelo antes de que K8s envíe SIGTERM
-              # Esto elimina los 502 durante rolling updates
               command: ["sh", "-c", "sleep 10"]
-        # 🚀 SONDAS REMOVIDAS AQUÍ PARA QUE PASEN DE UNA A 1/1 RUNNING
         resources:
           requests:
-            cpu: "200m"
-            memory: "256Mi"
+            cpu: "50m"
+            memory: "128Mi"
           limits:
-            cpu: "600m"
-            memory: "768Mi"
+            cpu: "200m"
+            memory: "384Mi"
         env:
+        # 🇨🇱 APAGAMOS EL AGENTE DE AWS TAMBIÉN EN VENTAS PARA QUE DEJE DE CONGELARSE
+        - name: AWS_OTEL_DISTRO_ENABLED
+          value: "false"
+        - name: OTEL_JAVAAGENT_ENABLED
+          value: "false"
+        # ===================================================================
         - name: DB_ENDPOINT
           value: "innovatech-db-svc"
         - name: DB_PORT
@@ -105,11 +108,11 @@ spec:
               command: ["sh", "-c", "sleep 10"]
         resources:
           requests:
-            cpu: "200m"
-            memory: "256Mi"
+            cpu: "50m"
+            memory: "128Mi"
           limits:
-            cpu: "600m"
-            memory: "768Mi"
+            cpu: "200m"
+            memory: "384Mi"
         env:
         - name: AWS_OTEL_DISTRO_ENABLED
           value: "false"
