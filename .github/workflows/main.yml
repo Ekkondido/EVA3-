@@ -1,0 +1,29 @@
+name: CI/CD Innovatech
+
+on:
+  push:
+    branches: [ main ] # Se ejecuta automáticamente con cada git push
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout del codigo
+      uses: actions/checkout@v4
+
+    - name: Configurar credenciales de AWS
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: us-east-1
+
+    - name: Login en Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, Tag y Push a ECR 🐋
+      run: |
+        docker build -t 911888005875.dkr.ecr.us-east-1.amazonaws.com/front-despacho:latest ./front_despacho
+        docker push 911888005875.dkr.ecr.us-east-1.amazonaws.com/front-despacho:latest
