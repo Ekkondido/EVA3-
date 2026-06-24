@@ -7,11 +7,7 @@ metadata:
   name: backend-venta
   namespace: innovatech
 spec:
-  replicas: 1  # 🇨🇱 ¡FIJAMOS 1 SÓLA RÉPLICA AQUÍ!
-  selector:
-    matchLabels:
-      app: backend-venta
-spec:
+  replicas: 1
   selector:
     matchLabels:
       app: backend-venta
@@ -37,11 +33,11 @@ spec:
               command: ["sh", "-c", "sleep 10"]
         resources:
           requests:
-            cpu: "50m"
-            memory: "128Mi"
-          limits:
             cpu: "200m"
-            memory: "384Mi"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         env:
         - name: AWS_OTEL_DISTRO_ENABLED
           value: "false"
@@ -86,11 +82,7 @@ metadata:
   name: backend-despacho
   namespace: innovatech
 spec:
-  replicas: 1  # 🇨🇱 ¡FIJAMOS 1 SÓLA RÉPLICA AQUÍ TAMBIÉN!
-  selector:
-    matchLabels:
-      app: backend-despacho
-spec:
+  replicas: 1
   selector:
     matchLabels:
       app: backend-despacho
@@ -116,11 +108,11 @@ spec:
               command: ["sh", "-c", "sleep 10"]
         resources:
           requests:
-            cpu: "50m"
-            memory: "128Mi"
-          limits:
             cpu: "200m"
-            memory: "384Mi"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         env:
         - name: AWS_OTEL_DISTRO_ENABLED
           value: "false"
@@ -153,5 +145,5 @@ spec:
   selector:
     app: backend-despacho
   ports:
-  - port: 8080        # 🇨🇱 FIX DEFINITIVO: Ahora calza con el proxy_pass del nginx.conf
-    targetPort: 8081  # 🚀 Apunta al 8081 interno que vimos en el log de Tomcat
+  - port: 8080
+    targetPort: 8081
