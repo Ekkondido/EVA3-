@@ -19,7 +19,7 @@ spec:
     metadata:
       labels:
         app: backend-venta
-    spec: # 🇨🇱 CORREGIDO: Ahora alinea perfecto con template (6 espacios)
+    spec:
       terminationGracePeriodSeconds: 20
       containers:
       - name: venta
@@ -143,5 +143,5 @@ spec:
   selector:
     app: backend-despacho
   ports:
-  - port: 8081       # 🇨🇱 CORREGIDO: Cambiado a 8081 para que Nginx conecte directo sin colisionar
-    targetPort: 8081
+  - port: 8080        # 🇨🇱 FIX DEFINITIVO: Ahora calza con el proxy_pass del nginx.conf
+    targetPort: 8081  # 🚀 Apunta al 8081 interno que vimos en el log de Tomcat
