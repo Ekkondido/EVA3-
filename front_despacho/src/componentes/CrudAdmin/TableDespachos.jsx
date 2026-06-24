@@ -10,7 +10,6 @@ export const TableDespachos = () => {
     if (value === null || value === undefined || value === "") {
       return fallback;
     }
-
     return value;
   };
 
@@ -18,7 +17,6 @@ export const TableDespachos = () => {
     if (value === null || value === undefined || value === "") {
       return "Sin valor";
     }
-
     return new Intl.NumberFormat("es-CL", {
       style: "currency",
       currency: "CLP",
@@ -30,14 +28,12 @@ export const TableDespachos = () => {
     if (!value) {
       return "Pendiente";
     }
-
     const normalizedDate = String(value).split("T")[0];
     const [year, month, day] = normalizedDate.split("-");
 
     if (!year || !month || !day) {
       return value;
     }
-
     return `${day}/${month}/${year}`;
   };
 
@@ -45,19 +41,21 @@ export const TableDespachos = () => {
     value ? "Despacho entregado" : "Despacho pendiente";
 
   const despacho = async () => {
-    await axios
-      .get("/api/v1/despachos", {
-        headers:{
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
+    try {
+      const response = await axios.get("/api/v1/despachos", {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
-      })
-      .then((response) => {
-        console.log(response.data);
-        setDespachos(response.data);
       });
+      console.log("Datos recibidos en Despachos:", response.data);
+      // Validamos que la respuesta sea un arreglo antes de guardarla
+      setDespachos(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error("Error al traer despachos:", error);
+    }
   };
-  // Llamada a la función para obtener los datos cuando el componente se monta
+
   useEffect(() => {
     despacho();
   }, []);
@@ -86,63 +84,71 @@ export const TableDespachos = () => {
                   <th className="pr-10">Entregado</th>
                   <th className="pr-10">Intentos de entrega</th>
                   <th className="pr-10">Valor compra</th>
+                  <th className="pr-10">Acción</th>
                 </tr>
               </thead>
               <tbody>
-                {despachos
-                  .map((despacho) => (
-                  <tr key={despacho.idDespacho}>
-                    <td className="pr-10 py-10 items-center">
-                      {formatValue(despacho.idDespacho, "N/A")}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {formatValue(despacho.idCompra)}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {formatValue(despacho.direccionCompra)}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {formatDate(despacho.fechaDespacho)}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {formatValue(despacho.patenteCamion)}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {formatDespachoStatus(despacho.despachado)}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {formatValue(despacho.intento, 0)}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {formatCurrency(despacho.valorCompra)}
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleAbrirModal(despacho)}
-                        className="py-1 bg-orange-200 px-8 rounded-xl shadow-md hover:bg-orange-300/70 transition-all duration-300 "
-                      >
-                        Cerrar despacho
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {despachos.map((item, index) => {
+                  // Mapeo seguro dinámico (si viene camelCase o snake_case desde el backend)
+                  const idDespachoReal = item.idDespacho ?? item.id_despacho ?? `index-${index}`;
+                  const idCompraReal = item.idCompra ?? item.id_compra;
+                  const direccionCompraReal = item.direccionCompra ?? item.direccion_compra;
+                  const fechaDespachoReal = item.fechaDespacho ?? item.fecha_despacho;
+                  const patenteCamionReal = item.patenteCamion ?? item.patente_camion;
+                  const despachadoReal = item.despachado;
+                  const intentoReal = item.intento;
+                  const valorCompraReal = item.valorCompra ?? item.valor_compra;
+
+                  return (
+                    <tr key={idDespachoReal}>
+                      <td className="pr-10 py-10 items-center">
+                        {formatValue(idDespachoReal, "N/A")}
+                      </td>
+                      <td className="pr-10 py-10 items-center">
+                        {formatValue(idCompraReal)}
+                      </td>
+                      <td className="pr-10 py-10 items-center">
+                        {formatValue(direccionCompraReal)}
+                      </td>
+                      <td className="pr-10 py-10 items-center">
+                        {formatDate(fechaDespachoReal)}
+                      </td>
+                      <td className="pr-10 py-10 items-center">
+                        {formatValue(patenteCamionReal)}
+                      </td>
+                      <td className="pr-10 py-10 items-center">
+                        {formatDespachoStatus(despachadoReal)}
+                      </td>
+                      <td className="pr-10 py-10 items-center">
+                        {formatValue(intentoReal, 0)}
+                      </td>
+                      <td className="pr-10 py-10 items-center">
+                        {formatCurrency(valorCompraReal)}
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleAbrirModal(item)}
+                          className="py-1 bg-orange-200 px-8 rounded-xl shadow-md hover:bg-orange-300/70 transition-all duration-300 "
+                        >
+                          Cerrar despacho
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       </section>
-      <Modal
-        onClose={() => {
-          setOpenModal(false);
-        }}
-        open={openModal}
-      >
+
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
         {despachoSeleccionado && (
           <FormCierreDespacho
             despacho={despachoSeleccionado}
             onClose={() => {
-              //onclose es un prop que pasa funciones al modal con el form abierto, por ende al cerrarse, se ejecutan esas 2 funciones
-              setOpenModal(false), despacho();
+              setOpenModal(false);
+              despacho();
             }}
           />
         )}
