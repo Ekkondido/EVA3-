@@ -9,13 +9,14 @@ RUN npm run build
 # --- Stage 2: Imagen final para producción (Nginx) ---
 FROM nginx:alpine AS production
 
-# Copiamos los archivos estáticos de React
+# 1. COPIAMOS TU CONFIGURACIÓN PERSONALIZADA CON LOS PROXIES 🚀
+# Al copiarlo encima de default.conf, matamos la config genérica y aplicamos tus rutas al tiro.
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 2. Copiamos los archivos estáticos de React
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# EXTREMADAMENTE IMPORTANTE: Cambiar el puerto base de Nginx al 8080 vía comandos
-RUN sed -i 's/listen\.+80;/listen 8080;/g' /etc/nginx/conf.d/default.conf
-
-# Exponemos el puerto alto seguro
+# Exponemos el puerto alto seguro que configuramos en tu nginx.conf
 EXPOSE 8080
 
 # Ajustamos permisos para que el usuario limitado pueda usar las carpetas de Nginx
