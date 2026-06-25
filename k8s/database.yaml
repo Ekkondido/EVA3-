@@ -47,8 +47,10 @@ metadata:
   name: innovatech-db-svc
   namespace: innovatech
 spec:
+  type: NodePort  # <-- AGREGAR ESTO: Le dice a K8s que exponga el puerto en los nodos físicos
   selector:
     app: mysql
   ports:
   - port: 3306
     targetPort: 3306
+    nodePort: 30306  # <-- AGREGAR ESTO: El puerto físico que se abrirá en las instancias EC2
